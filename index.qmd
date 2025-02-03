@@ -1,0 +1,209 @@
+---
+title: "NOSO Targeting"
+author:  
+   Idrissa DABO/RAM Officer
+title-block-banner: "#D7DBDD"
+date-modified: "02/03/2025"
+date-format: "MM/D/YYYY"
+lang: fr
+language: 
+  title-block-author-single: "RAM WFP Cameroon"
+  title-block-modified: "Last Update"
+format: 
+  html:
+    self-contained: true
+    toc: true
+    toc-location: right
+editor: visual
+---
+
+```{r echo=FALSE}
+htmltools::img(src = knitr::image_uri(file.path("image/WFP-logo.png")), 
+               alt = 'logo', 
+               style = 'position:absolute; top:0; right:0; padding:10px;',width = 200,height = 145)
+```
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(connectoModa)
+library(openxlsx)
+library(haven)
+library(labelled)
+library(gtsummary)
+library(fs)
+library(wordcloud)
+library(sf)
+library(leaflet)
+library(ggplot2)
+library(ggeasy)
+library(writexl)
+library(DT)
+library(echarts4r)
+library(fst)
+```
+
+## Geographical targeting status
+
+```{r echo=FALSE, warning=FALSE}
+situation <- readxl::read_xlsx("data/situation.xlsx")
+shape_cmr <- st_read("data/cmr_admbnda_inc_20180104_SHP/cmr_admbnda_adm3_inc_20180104.shp",quiet = T)
+situation <- situation |> left_join(
+  shape_cmr, by = "ADM3_PCODE"
+)
+
+# leaflet
+situation <- st_as_sf(situation)
+
+pal <-  colorFactor(palette = c("#c6ffc7", "#e02d00"),
+                    levels = c("complete", "ongoing"))
+
+popupvalue <- paste0("<br><strong>Region :  </strong>",situation$Region,
+                     "<br><strong>Division :  </strong>",situation$Divisions,
+                     "<br><strong>Subdivision :  </strong>",situation$`Subdivisions`,
+                     "<br><strong>Geographical Targeting:  </strong>",situation$`Geographical targeting`) %>% 
+  lapply(htmltools::HTML)
+
+adminpopup <- paste0("<br><strong>Region :  </strong>",situation$Region,
+                     "<br><strong>Division :  </strong>",situation$Divisions,
+                     "<br><strong>Subdivision :  </strong>",situation$`Subdivisions`,
+                     "<br><strong>Geographical Targeting:  </strong>",situation$`Geographical targeting`) %>% 
+  lapply(htmltools::HTML)
+
+situation %>% leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>%
+  # setView(lat= 13, lng=3, zoom=4) %>%
+  addPolygons(
+    fillColor = ~pal(situation$`Geographical targeting`),
+    fillOpacity = 0.7,
+    color = "white",
+    opacity = 0.7,
+    weight = 2,
+    dashArray = "2",
+    popup = popupvalue,
+    highlight = highlightOptions(
+      weight = 3,
+      color = "black",
+      fillOpacity = 1,
+      bringToFront = TRUE),
+    label = adminpopup,
+    labelOptions = labelOptions(
+      textsize = "12px",
+      direction = "auto"
+    )
+    
+  ) %>% addLegend(
+    pal = pal, values = ~situation$`Geographical targeting`,
+    opacity = 0.7, title = "Geographical tareting", position = "topright"
+  )
+```
+
+## PVs Status
+
+```{r echo=FALSE, warning=FALSE}
+situation <- readxl::read_xlsx("data/situation.xlsx")
+shape_cmr <- st_read("data/cmr_admbnda_inc_20180104_SHP/cmr_admbnda_adm3_inc_20180104.shp",quiet = T)
+situation <- situation |> left_join(
+  shape_cmr, by = "ADM3_PCODE"
+)
+
+# leaflet
+situation <- st_as_sf(situation)
+
+pal <-  colorFactor(palette = c("#c6ffc7", "#e02d00"),
+                    levels = c("received", "Not received"))
+
+popupvalue <- paste0("<br><strong>Region :  </strong>",situation$Region,
+                     "<br><strong>Division :  </strong>",situation$Divisions,
+                     "<br><strong>Subdivision :  </strong>",situation$`Subdivisions`,
+                     "<br><strong>PV Status :  </strong>",situation$PVs) %>% 
+  lapply(htmltools::HTML)
+
+adminpopup <- paste0("<br><strong>Region :  </strong>",situation$Region,
+                     "<br><strong>Division :  </strong>",situation$Divisions,
+                     "<br><strong>Subdivision :  </strong>",situation$`Subdivisions`,
+                     "<br><strong>PV Status:  </strong>",situation$PVs) %>% 
+  lapply(htmltools::HTML)
+
+situation %>% leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>%
+  # setView(lat= 13, lng=3, zoom=4) %>%
+  addPolygons(
+    fillColor = ~pal(situation$PVs),
+    fillOpacity = 0.7,
+    color = "white",
+    opacity = 0.7,
+    weight = 2,
+    dashArray = "2",
+    popup = popupvalue,
+    highlight = highlightOptions(
+      weight = 3,
+      color = "black",
+      fillOpacity = 1,
+      bringToFront = TRUE),
+    label = adminpopup,
+    labelOptions = labelOptions(
+      textsize = "12px",
+      direction = "auto"
+    )
+    
+  ) %>% addLegend(
+    pal = pal, values = ~situation$PVs,
+    opacity = 0.7, title = "PVs Status", position = "topright"
+  )
+```
+
+## Community Criteria Status
+
+```{r echo=FALSE, warning=FALSE}
+situation <- readxl::read_xlsx("data/situation.xlsx")
+shape_cmr <- st_read("data/cmr_admbnda_inc_20180104_SHP/cmr_admbnda_adm3_inc_20180104.shp",quiet = T)
+situation <- situation |> left_join(
+  shape_cmr, by = "ADM3_PCODE"
+)
+
+# leaflet
+situation <- st_as_sf(situation)
+
+pal <-  colorFactor(palette = c("#c6ffc7", "#e02d00"),
+                    levels = c("received", "Not received"))
+
+popupvalue <- paste0("<br><strong>Region :  </strong>",situation$Region,
+                     "<br><strong>Division :  </strong>",situation$Divisions,
+                     "<br><strong>Subdivision :  </strong>",situation$`Subdivisions`,
+                     "<br><strong>Community criteria :  </strong>",situation$`Community Criteria`) %>% 
+  lapply(htmltools::HTML)
+
+adminpopup <- paste0("<br><strong>Region :  </strong>",situation$Region,
+                     "<br><strong>Division :  </strong>",situation$Divisions,
+                     "<br><strong>Subdivision :  </strong>",situation$`Subdivisions`,
+                     "<br><strong>Community criteria :  </strong>",situation$`Community Criteria`) %>% 
+  lapply(htmltools::HTML)
+
+situation %>% leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>%
+  # setView(lat= 13, lng=3, zoom=4) %>%
+  addPolygons(
+    fillColor = ~pal(situation$`Community Criteria`),
+    fillOpacity = 0.7,
+    color = "white",
+    opacity = 0.7,
+    weight = 2,
+    dashArray = "2",
+    popup = popupvalue,
+    highlight = highlightOptions(
+      weight = 3,
+      color = "black",
+      fillOpacity = 1,
+      bringToFront = TRUE),
+    label = adminpopup,
+    labelOptions = labelOptions(
+      textsize = "12px",
+      direction = "auto"
+    )
+    
+  ) %>% addLegend(
+    pal = pal, values = ~situation$`Community Criteria`,
+    opacity = 0.7, title = "Community Criteria Status", position = "topright"
+  )
+```
